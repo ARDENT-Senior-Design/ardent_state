@@ -31,7 +31,7 @@ namespace ardent_model{
             typedef Eigen::Vector3d Vector3d;
             typedef Eigen::Matrix4d Matrix4d;
             typedef Eigen::Matrix3d Matrix3d;
-
+                
             // Rotational robot state
             Matrix3d rotation; 
             Matrix3d rotation_dot;

@@ -13,6 +13,12 @@
 #include <transmission_interface/transmission_parser.h>
 #include <control_toolbox/filters.h>
 
+// MoveIt!
+#include <moveit/robot_model_loader/robot_model_loader.h>
+#include <moveit/robot_model/robot_model.h>
+#include <moveit/robot_state/robot_state.h>
+
+
 #include <sensor_msgs/JointState.h>
 #include <ardent_msgs/RobotStatistics.h>
 #include <ardent_msgs/LegStatistics.h>
@@ -30,8 +36,11 @@ namespace ardent_model {
         public:
             ros::NodeHandle n;
             BodyKinematics body_;
-            std::vector<LegKinematics> legs_;
+            std::vector<const robot_State::JointModelGroup*> legs_;
             std::vector<ardent_msgs::LegStatisticsConstPtr> leg_state_;
+
+            robot_model::RobotModelPtr kinematic_model_;
+            robot_state::RobotStatePtr *kinematic_state_;
             int num_legs_;
 
             /// a pointer to the ardent hardware interface. 
@@ -46,8 +55,8 @@ namespace ardent_model {
              * @brief Creates a new robot
              * @param legs_ an array of the legs that will be added to the robot in order of right/left (r/l) and front (f), mid(m), and rear(r)
              */
-            Robot();
-            ~Robot(){}
+            Robot(std::string robot_name);
+            ~Robot();
 
             /// Initialize the robot model from an xml file. 
             // Probably faster in real time to use TiXmlElement

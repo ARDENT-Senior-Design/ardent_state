@@ -2,15 +2,28 @@
 
 using namespace ardent_model;
 
-Robot::Robot()
+Robot::Robot(std::string robot_name)
 {
-    std::vector<std::string> legs= {"rf","rm","rr","lf","lm","lr"};
-    num_legs_ = legs.size();
-    
-    for(int i=0;i<legs.size();i++){
-        legs_.push_back(LegKinematics(legs[i]));
-    }
-    //initialize the legs based on the body offset
+  
+  robot_model_loader::RobotModelLoader robot_model_loader_(robot_name);
+  kinematic_model_ = robot_model_loader_.getModel();
+
+  ROS_INFO("Model frame: %s", kinematic_model_->getModelFrame().c_str());
+
+  kinematic_state_ = new robot_state::RobotStatePtr(new robot_state::RobotState(kinematic_model_));
+  (*kinematic_state_)->setToDefaultValues();
+  
+  num_legs_ = 4;
+  
+  for(int i=0;i<num_legs_;i++){
+      legs_.push_back((*kinematic_state_)->getJointModelGroup("leg_"+num_legs_.cstr_());
+  }
+  //initialize the legs based on the body offset
+}
+
+Robot::~Robot()
+{
+  delete kinematic_state_;
 }
 
 ros::Time RobotState::getTime()

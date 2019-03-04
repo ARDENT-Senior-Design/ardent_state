@@ -7,6 +7,9 @@ find_package(catkin REQUIRED COMPONENTS
   roscpp
   sensor_msgs
   std_msgs
+  moveit_core
+  moveit_ros_planning 
+  moveit_ros_planning_interface 
   ardent_msgs
   ardent_description
   hardware_interface
@@ -44,8 +47,8 @@ catkin_package(
 
 # add_executable(walking_test test/walking_test.cc)
 # target_link_libraries(walking_test ${catkin_LIBRARIES} ${PROJECT_NAME})
-add_executable(FK_IK test/FK_IK.cpp)
-target_link_libraries(FK_IK ${catkin_LIBRARIES})
+add_executable(moveit_state_test test/moveit_state_test.cpp)
+target_link_libraries(moveit_state_test ${catkin_LIBRARIES})
 
 target_link_libraries(${PROJECT_NAME} ${Boost_LIBRARIES} ${catkin_LIBRARIES})
 
