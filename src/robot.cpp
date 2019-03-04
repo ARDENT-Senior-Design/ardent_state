@@ -2,28 +2,26 @@
 
 using namespace ardent_model;
 
-Robot::Robot(std::string robot_name)
+Robot::Robot(std::string robot_name) : robot_model_loader_(robot_name), 
+  kinematic_model_(robot_model_loader_.getModel()),
+  kinematic_state_(new robot_state::RobotState(kinematic_model_))
 {
-  
-  robot_model_loader::RobotModelLoader robot_model_loader_(robot_name);
-  kinematic_model_ = robot_model_loader_.getModel();
-
+  kinematic_state_->setToDefaultValues();
   ROS_INFO("Model frame: %s", kinematic_model_->getModelFrame().c_str());
 
-  kinematic_state_ = new robot_state::RobotStatePtr(new robot_state::RobotState(kinematic_model_));
-  (*kinematic_state_)->setToDefaultValues();
   
-  num_legs_ = 4;
+  num_legs_ = 5;
   
-  for(int i=0;i<num_legs_;i++){
-      legs_.push_back((*kinematic_state_)->getJointModelGroup("leg_"+num_legs_.cstr_());
+  for(int i=1;i<num_legs_;i++){
+      legs_.push_back(kinematic_state_->getJointModelGroup("leg_"+std::to_string(i)));
+      ROS_INFO("Leg_%s added", std::to_string(i));
   }
   //initialize the legs based on the body offset
 }
 
 Robot::~Robot()
 {
-  delete kinematic_state_;
+  //delete kinematic_state_;
 }
 
 ros::Time RobotState::getTime()
@@ -33,41 +31,41 @@ ros::Time RobotState::getTime()
 
 void Robot::publishLegPosition(std::string leg_id, Eigen::Vector3d& ee_pos)
 {
-    int leg_map = getMappedLeg(leg_id);
-    legs_[leg_map].getIkCommandedAngles(ee_pos);
-    legs_[leg_map].publishCommandedJointState();
+    // int leg_map = getMappedLeg(leg_id);
+    // legs_[leg_map].getIkCommandedAngles(ee_pos);
+    // legs_[leg_map].publishCommandedJointState();
 }
 
 std::string Robot::getMappedLeg(int leg_num)
 {
-    static const std::map<int,std::string> leg_map{
-        {0, "rf"},
-        {1,"rm"},
-        {2, "rr"},
-        {3, "lf"},
-        {4, "lm"},
-        {5, "lr"}
-    };
-    return leg_map.at(leg_num);
+    // static const std::map<int,std::string> leg_map{
+    //     {0, "rf"},
+    //     {1,"rm"},
+    //     {2, "rr"},
+    //     {3, "lf"},
+    //     {4, "lm"},
+    //     {5, "lr"}
+    // };
+    // return leg_map.at(leg_num);
 }
 int Robot::getMappedLeg(std::string leg_id)
 {
-    static const std::map<std::string, int> leg_map{
-        {"rf", 0},
-        {"rm", 1},
-        {"rr", 2},
-        {"lf", 3},
-        {"lm", 4},
-        {"lr", 5}
-    };return leg_map.at(leg_id);
+    // static const std::map<std::string, int> leg_map{
+    //     {"rf", 0},
+    //     {"rm", 1},
+    //     {"rr", 2},
+    //     {"lf", 3},
+    //     {"lm", 4},
+    //     {"lr", 5}
+    // };return leg_map.at(leg_id);
 
 }
 bool Robot::checkStability()
 {
-    std::vector<float> contact_legs;
-    for(int i=0;i<num_legs_;i++){
-        //if(GetMappedLeg(i))
-    }
+    // std::vector<float> contact_legs;
+    // for(int i=0;i<num_legs_;i++){
+    //     //if(GetMappedLeg(i))
+    // }
 }
 
 bool Robot::initXml(const std::string xml)
@@ -125,7 +123,7 @@ void RobotState::enforceSafety()
 {
   for (size_t i = 0; i < model_->legs_.size(); ++i)
   {
-    model_->legs_[i].forceJointConstraints();
+    // model_->legs_[i].forceJointConstraints();
   }
 }
 

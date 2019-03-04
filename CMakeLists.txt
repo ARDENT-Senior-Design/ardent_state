@@ -45,8 +45,9 @@ catkin_package(
   LIBRARIES ${PROJECT_NAME}
 )
 
-# add_executable(walking_test test/walking_test.cc)
-# target_link_libraries(walking_test ${catkin_LIBRARIES} ${PROJECT_NAME})
+add_executable(walking_test test/walking_test.cc)
+target_link_libraries(walking_test ${catkin_LIBRARIES} ${PROJECT_NAME})
+
 add_executable(moveit_state_test test/moveit_state_test.cpp)
 target_link_libraries(moveit_state_test ${catkin_LIBRARIES})
 
