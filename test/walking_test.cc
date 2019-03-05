@@ -2,41 +2,38 @@
 #include "std_msgs/Float64.h"
 #include "../include/ardent_states/robot.h"
 
-float leg_num = -1;
+double angle;
 void timerCallback(const ros::TimerEvent& event){
-    if(leg_num >= 6)
+    ROS_INFO("MOVING THE LEG");
+    if(angle == 0)
     {
-        leg_num = 0;
+        angle = 1;
     }
-    else{
-        leg_num+=2;
+    else
+    {
+        angle *=-1;
     }
 }
 
 int main(int argc, char **argv)
 {
     ros::init(argc, argv, "walking_test");
-    ros::NodeHandle n;
     ardent_model::Robot ardent("robot_description");
+    ros::NodeHandle n;
+    angle = 0;
     //test
     // blah
     //Eigen::Vector3d command1 = Eigen::Vector3d(0.35,0.0,-0.25); //relative to the center of the body
     //Eigen::Vector3d command2 = Eigen::Vector3d(0.2,0.0,0);
 
     ros::Timer timer = n.createTimer(ros::Duration(2.0), timerCallback);
-    float angle = 0;
-    ros::Rate loop_rate(10);
+    ros::Rate loop_rate(1000);
 
     while(ros::ok())
     {
-        /*for(int i=0;i<6;i++){
-            if(i == leg_num){
-                ardent.PublishLegPosition(ardent.GetMappedLeg(i),command2);
-            }
-            else{
-                ardent.PublishLegPosition(ardent.GetMappedLeg(i), command1);
-            }
-        }*/
+        ardent.legs_[0]->getJointAngles();
+        ardent.legs_[0]->joint_angles_[1] = angle;
+        ardent.legs_[0]->setJointAngles();
         ros::spinOnce();
         loop_rate.sleep();
     }

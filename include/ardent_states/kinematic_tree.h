@@ -15,71 +15,24 @@
 #include <sensor_msgs/JointState.h>
 #include "joint.h"
 
+#include <moveit/robot_model/robot_model.h>
+#include <moveit/robot_state/robot_state.h>
+
 namespace ardent_model{
-    // ardent_model is a namespace that just accumulates the  
-    class RobotKinematics
-    {
-        public:
-            std::vector<std::vector<float> > ee_jacobian; // Jacobian matrix of all links
-            // handles the combination of both body and leg data? basically fuses it.
-        private:
-    };
-    class BodyKinematics
-    {
-        #define BODY_THICKNESS 2
-        public:
-            typedef Eigen::Vector3d Vector3d;
-            typedef Eigen::Matrix4d Matrix4d;
-            typedef Eigen::Matrix3d Matrix3d;
-                
-            // Rotational robot state
-            Matrix3d rotation; 
-            Matrix3d rotation_dot;
-            Matrix3d rotation_ddot;    
-
-            // Vector position of the body relative to the odometry frame
-            Vector3d body_pose;
-            
-            // Radius of the body
-            double radius;
-
-            /**
-             * Supporting Library
-             * @brief Constructor for the body frame of the robot
-             */
-            BodyKinematics(); //= default;
-            // ~BodyKinematics(); //= default;
-            
-            /**
-             * @brief Turns the rotation matrix into formal roll, pitch, yaw
-             * 
-             */
-            Vector3d getRPY();
-
-            /**
-             * @brief The transform to the coxa joint of a leg based on the orientation and size of the body
-             * @return The transform from the centroid of the body to the leg location based on the RPY of the robot body and relative leg coordinate
-             */
-            Matrix4d getLegPosition(std::string leg_id);
-
-                /**
-             * @brief Returns the 0-angle of the leg relative to the IMU direction
-             * @return The angular offset of the leg regular to the X-axis
-             */
-            double getLegAngleOffset(std::string leg_id);
-
-        private:
-            
-            
-    };
 
     class LegKinematics 
     {
         public:
             typedef Eigen::Vector3d Vector3d;
-
-            std::vector<JointState*> joints_;    // list of joints
-            std::string leg_id;
+            
+            // This class embodies a joint group object
+            ros::NodeHandle n;
+            robot_state::RobotStatePtr kinematic_state_;
+            const robot_state::JointModelGroup* joint_model_group_;
+            std::vector<std::string> joint_names_;
+            std::vector<double> joint_angles_;
+            std::vector<JointState*> joints_;    // list of jointsx
+            std::string id_;
             Vector3d ee_pos;                    // end effector position relative to the coxa
             Vector3d ee_velocity;
             Vector3d ee_acceleration;
@@ -90,8 +43,15 @@ namespace ardent_model{
              * @param led_id is one of the legs COXA, FEMUR, TIBIA
              * @param radial_offset is the distance from the origin to the leg position
              */
-            LegKinematics(std::string leg_id);
+            LegKinematics(robot_model::RobotModelPtr kinematic_model, std::string id);
             ~LegKinematics();
+            
+            void setJointAngles();
+
+            /**
+             * @brief Retreives the current angles of the joints
+             */
+            void getJointAngles();
             
             /**
              * @brief Updates the target leg angle position based on an end-effector position. 

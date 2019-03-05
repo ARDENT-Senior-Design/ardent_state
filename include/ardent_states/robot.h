@@ -35,13 +35,15 @@ namespace ardent_model {
         private: 
         public:
             ros::NodeHandle n;
-            BodyKinematics body_;
-            std::vector<const robot_state::JointModelGroup*> legs_;
-            std::vector<ardent_msgs::LegStatisticsConstPtr> leg_state_;
             
+            //moveit setup
             robot_model_loader::RobotModelLoader robot_model_loader_;
             robot_model::RobotModelPtr kinematic_model_;
-            robot_state::RobotStatePtr kinematic_state_;
+            std::vector<LegKinematics*> legs_;
+            std::vector<const robot_state::JointModelGroup*> joint_model_group_;
+            std::vector<std::vector<std::string> > joint_names_;
+            std::vector<double> joint_angles_;
+
             int num_legs_;
 
             /// a pointer to the ardent hardware interface. 

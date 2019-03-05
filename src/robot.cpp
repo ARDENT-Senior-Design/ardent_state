@@ -3,25 +3,30 @@
 using namespace ardent_model;
 
 Robot::Robot(std::string robot_name) : robot_model_loader_(robot_name), 
-  kinematic_model_(robot_model_loader_.getModel()),
-  kinematic_state_(new robot_state::RobotState(kinematic_model_))
+  kinematic_model_(robot_model_loader_.getModel())
 {
-  kinematic_state_->setToDefaultValues();
   ROS_INFO("Model frame: %s", kinematic_model_->getModelFrame().c_str());
+  num_legs_ = 4;
+  for(int i=0;i<num_legs_;i++){
+    // joint_model_group_.push_back(kinematic_model_->getJointModelGroup("leg_"+std::to_string(i+1)));
+    legs_.push_back(new LegKinematics(kinematic_model_, std::to_string(i+1)));
+    
+    // joint_names_.push_back(joint_model_group_[i]->getVariableNames());
+    // ROS_INFO("added joint name");
+    // kinematic_state_->copyJointGroupPositions(joint_model_group_[i], joint_angles_);
+    // for (std::size_t j = 0; j < joint_names_[i].size(); ++j)
+    // {
+    //   ROS_INFO("Joint %s: %f", joint_names_[i][j].c_str(), joint_angles_[i][j]);
+    // }
 
-  
-  num_legs_ = 5;
-  
-  for(int i=1;i<num_legs_;i++){
-      legs_.push_back(kinematic_state_->getJointModelGroup("leg_"+std::to_string(i)));
-      ROS_INFO("Leg_%s added", std::to_string(i));
   }
+  
   //initialize the legs based on the body offset
 }
 
 Robot::~Robot()
 {
-  //delete kinematic_state_;
+
 }
 
 ros::Time RobotState::getTime()
@@ -121,10 +126,10 @@ bool RobotState::isHalted()
 
 void RobotState::enforceSafety()
 {
-  for (size_t i = 0; i < model_->legs_.size(); ++i)
-  {
-    // model_->legs_[i].forceJointConstraints();
-  }
+  // for (size_t i = 0; i < model_->legs_.size(); ++i)
+  // {
+  //   // model_->legs_[i].forceJointConstraints();
+  // }
 }
 
 void RobotState::zeroCommands()
