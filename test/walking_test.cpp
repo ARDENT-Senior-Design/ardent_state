@@ -1,6 +1,6 @@
 #include "ros/ros.h"
 #include "std_msgs/Float64.h"
-#include "../include/ardent_states/robot.h"
+// #include "../include/ardent_states/robot.h"
 
 double angle;
 void timerCallback(const ros::TimerEvent& event){
@@ -18,7 +18,6 @@ void timerCallback(const ros::TimerEvent& event){
 int main(int argc, char **argv)
 {
     ros::init(argc, argv, "walking_test");
-    ardent_model::Robot ardent("robot_description");
     ros::NodeHandle n;
     angle = 0;
     //test
@@ -31,9 +30,6 @@ int main(int argc, char **argv)
 
     while(ros::ok())
     {
-        ardent.legs_[0]->getJointAngles();
-        ardent.legs_[0]->joint_angles_[1] = angle;
-        ardent.legs_[0]->setJointAngles();
         ros::spinOnce();
         loop_rate.sleep();
     }

@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 2.8.3)
-project(ardent_state)
+project(ardent_state_simple)
 
 
 add_compile_options(-std=c++11)
@@ -7,12 +7,11 @@ find_package(catkin REQUIRED COMPONENTS
   roscpp
   sensor_msgs
   std_msgs
-  moveit_core
-  moveit_ros_planning 
-  moveit_ros_planning_interface 
-  ardent_msgs
-  ardent_description
+  ardent_msgs_simple
+  ardent_description_simple
   hardware_interface
+  kdl_parser
+  trac_ik_lib
   urdf
 )
 find_package(cmake_modules REQUIRED)
@@ -27,8 +26,6 @@ include_directories(include ${Boost_INCLUDE_DIRS} ${catkin_INCLUDE_DIRS} ${EIGEN
 
 add_library(${PROJECT_NAME} 
   src/kinematic_tree.cpp
-  src/robot.cpp
-  src/joint.cpp  
   )
 
 catkin_package(
@@ -38,18 +35,16 @@ catkin_package(
     # gazebo_ros
     hardware_interface
     urdf
-    ardent_description
+    ardent_description_simple
   DEPENDS 
     Boost
     TinyXML
   LIBRARIES ${PROJECT_NAME}
 )
 
-add_executable(walking_test test/walking_test.cc)
+add_executable(walking_test test/walking_test.cpp)
 target_link_libraries(walking_test ${catkin_LIBRARIES} ${PROJECT_NAME})
 
-add_executable(moveit_state_test test/moveit_state_test.cpp)
-target_link_libraries(moveit_state_test ${catkin_LIBRARIES})
 
 target_link_libraries(${PROJECT_NAME} ${Boost_LIBRARIES} ${catkin_LIBRARIES})
 
