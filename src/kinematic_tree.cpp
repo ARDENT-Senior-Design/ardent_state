@@ -19,17 +19,26 @@ void LegKinematicTree::init()
     }
     fk_solver_ptr_ = new KDL::ChainFkSolverPos_recursive(chain_);
     jnt_array_ = KDL::JntArray(chain_.getNrOfJoints());
-    
+    ROS_INFO("Leg Initialized");
+    ROS_INFO ("Using %d joints",chain_.getNrOfJoints());
+
+    fk_solver_ptr_->JntToCart(jnt_array_,target_frame_);
+
+    KDL::JntArray initial_joint_pose(chain_.getNrOfJoints());
+
+    for (uint j=0; j<initial_joint_pose.data.size(); j++) {
+    initial_joint_pose(j) = 0;
+  }    
+
     // offset the positions of the leg based on it's position
+    // {x,y,z,r,p,y}
     std::vector<std::vector<double>> com2foot {{HBDY_L, SHOU_L, -CLEG_L, 0, 0, 0},
                                                 {HBDY_L, -SHOU_L, -CLEG_L, 0, 0, 0},
                                                 {-HBDY_L, SHOU_L, -CLEG_L, 0, 0, 0},
                                                 {-HBDY_L, -SHOU_L, -CLEG_L, 0, 0, 0}}; 
     jnt_array_(0) = 0; // shoulder joint
-    jnt_array_(1) = PI/6.0;
-    jnt_array_(2) = -PI/3.0;
-    jnt_array_(3) = -PI/3.0;
-    jnt_array_(4) = 0; // shoe joint
+    jnt_array_(1) = 0;
+    jnt_array_(2) = 0;
     switch(leg_id_)
     {
         case 1: start2end_ = com2foot[0]; break;
@@ -37,4 +46,62 @@ void LegKinematicTree::init()
         case 3: start2end_ = com2foot[2]; break;
         case 4: start2end_ = com2foot[3]; break;
     }
+    ROS_INFO("Leg params stored");
+
 }
+
+LegKinematicTree::LegKinematicTree(const int leg_id):
+    leg_id_(leg_id),
+    urdf_("/robot_description"),
+    timeout_(0.005),
+    eps_(2e-5)
+{
+    init();
+}
+
+LegKinematicTree::LegKinematicTree(const int leg_id, std::string _urdf_param, double _timeout, double _eps):
+    leg_id_(leg_id),
+    urdf_(_urdf_param),
+    timeout_(_timeout),
+    eps_(_eps)
+{
+    init();
+}
+
+void LegKinematicTree::setEndPose(const std::vector<double>& _pose) // x, y, z, R, P, Y
+{
+    std::vector<double> bias; 
+    double x = _pose[0];
+    double y = _pose[1];
+    double z = _pose[2];
+    double R = _pose[3];
+    double P = _pose[4];
+    double Y = _pose[5];
+    KDL::Vector v(x, y, z);
+    target_frame_ = KDL::Frame(KDL::Rotation::RPY(R, P, Y), v);
+}
+
+bool LegKinematicTree::getIKSol(std::vector<double>& _jnts)
+{
+    KDL::JntArray result; 
+    int rc = 0; 
+    rc = tracik_solver_ptr_->CartToJnt(jnt_array_, target_frame_, result);
+    ROS_INFO("\n%f",(float)rc);
+    ROS_INFO("Inverse Kinematic Angles \nJoint 1: %f\nJoint 2: %f\nJoint 3: %f\n", (float)result.data[0],(float)result.data[0],(float)result.data[0]);
+    if(rc < 0)
+    {
+        return false;
+    }
+    else
+    {
+        // clear out the joint configuration sent and replace it with the new calculated values
+        _jnts.clear();
+        for(size_t i = 0; i < chain_.getNrOfJoints(); i ++)
+        {
+            _jnts.push_back(result(i));
+        }
+        
+        return true;
+    }
+}
+
