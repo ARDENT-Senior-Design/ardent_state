@@ -17,7 +17,7 @@
 
 namespace ardent_model {
 
-    #define PI 3.14159
+    #define PI 3.1415
     #define SHOU_L 0.04
     #define CLEG_L 0.086
     #define HBDY_L 0.05 
@@ -57,7 +57,7 @@ namespace ardent_model {
             ~LegKinematicTree(){};
             void init();
             void setEndPose(const std::vector<double>& _pose); // x, y, z, R, P, Y
-            
+            void setBiasedEndPose(const std::vector<double>& _pose);
             /** 
              * Calculate the inverse kinematics 
              * @brief Creates a new robot

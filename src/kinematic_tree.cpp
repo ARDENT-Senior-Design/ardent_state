@@ -30,7 +30,7 @@ void LegKinematicTree::init()
     initial_joint_pose(j) = 0;
   }    
 
-    // offset the positions of the leg based on it's position
+    // offset the positions of the leg based on it's default position
     // {x,y,z,r,p,y}
     std::vector<std::vector<double>> com2foot {{HBDY_L, SHOU_L, -CLEG_L, 0, 0, 0},
                                                 {HBDY_L, -SHOU_L, -CLEG_L, 0, 0, 0},
@@ -50,9 +50,9 @@ void LegKinematicTree::init()
 
 }
 
-LegKinematicTree::LegKinematicTree(const int leg_id):
+LegKinematicTree::LegKinematicTree(const int leg_id, std::string urdf):
     leg_id_(leg_id),
-    urdf_("/robot_description"),
+    urdf_(urdf),
     timeout_(0.005),
     eps_(2e-5)
 {
@@ -77,6 +77,21 @@ void LegKinematicTree::setEndPose(const std::vector<double>& _pose) // x, y, z, 
     double R = _pose[3];
     double P = _pose[4];
     double Y = _pose[5];
+    KDL::Vector v(x, y, z);
+    target_frame_ = KDL::Frame(KDL::Rotation::RPY(R, P, Y), v);
+}
+
+void LegKinematicTree::setBiasedEndPose(const std::vector<double>& _pose) // x, y, z, R, P, Y
+{
+    // bias shifts the origin reference point to the tip of the foot at a default position
+    std::vector<double> bias; 
+
+    double x = _pose[0]+bias[0];
+    double y = _pose[1]+bias[1];
+    double z = _pose[2]+bias[2];
+    double R = _pose[3]+bias[3];
+    double P = _pose[4]+bias[4];
+    double Y = _pose[5]+bias[5];
     KDL::Vector v(x, y, z);
     target_frame_ = KDL::Frame(KDL::Rotation::RPY(R, P, Y), v);
 }

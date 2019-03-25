@@ -26,6 +26,7 @@ include_directories(include ${Boost_INCLUDE_DIRS} ${catkin_INCLUDE_DIRS} ${EIGEN
 
 add_library(${PROJECT_NAME} 
   src/kinematic_tree.cpp
+  src/robot.cpp
   )
 
 catkin_package(
@@ -46,6 +47,8 @@ add_executable(walking_test test/walking_test.cpp)
 target_link_libraries(walking_test ${catkin_LIBRARIES} ${PROJECT_NAME})
 add_executable(single_leg_test test/single_leg_test.cpp)
 target_link_libraries(single_leg_test ${catkin_LIBRARIES} ${PROJECT_NAME})
+add_executable(single_leg_test_raw test/single_leg_test.cpp)
+target_link_libraries(single_leg_test_raw ${catkin_LIBRARIES} ${PROJECT_NAME})
 
 
 target_link_libraries(${PROJECT_NAME} ${Boost_LIBRARIES} ${catkin_LIBRARIES})

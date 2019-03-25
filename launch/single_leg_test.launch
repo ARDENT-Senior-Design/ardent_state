@@ -7,8 +7,11 @@
   <param name="robot_description" command="$(find xacro)/xacro --inorder $(arg model)" />
   <param name="use_gui" value="$(arg gui)"/>
 
-  <node name="single_leg_test" pkg="ardent_state_simple" type="single_leg_test" output="screen"/>
+  <!-- <node name="single_leg_test" pkg="ardent_state_simple" type="single_leg_test" output="screen"/> -->
+  <node name="single_leg_test_raw" pkg="ardent_state_simple" type="single_leg_test_raw" output="screen"/>
+  
   <node name="robot_state_publisher" pkg="robot_state_publisher" type="state_publisher"/>
+  <!-- Uncomment the joint state publisher if you want to manually control the legs with sliders -->
   <!-- <node name="joint_state_publisher" pkg="joint_state_publisher" type="joint_state_publisher" /> -->
 
   <node name="rviz" pkg="rviz" type="rviz" args="-d $(arg rvizconfig)" required="true" />

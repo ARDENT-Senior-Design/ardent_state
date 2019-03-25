@@ -9,8 +9,8 @@
 #include "kdl/chainiksolverpos_nr_jl.hpp"
 #include "trac_ik/trac_ik.hpp"
 #include "urdf/model.h"
-#include "../include/ardent_state_simple/robot.h"
 
+const double PI = 3.14159;
 bool flag;
 bool prev_flag;
 void timerCallback(const ros::TimerEvent&)
