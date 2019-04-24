@@ -9,7 +9,7 @@
 #include "kdl/chainiksolverpos_nr_jl.hpp"
 #include "trac_ik/trac_ik.hpp"
 #include "urdf/model.h"
-
+#include <chrono>
 const double PI = 3.14159;
 bool flag;
 bool prev_flag;
@@ -25,7 +25,7 @@ int main(int argc, char** argv)
     ros::Publisher joint_pub = n.advertise<sensor_msgs::JointState>("joint_states", 10);
     tf::TransformBroadcaster broadcaster;
     ros::Timer timer = n.createTimer(ros::Duration(1.0), timerCallback);
-    ros::Rate loop_rate(10);
+    ros::Rate loop_rate(1000);
     flag = true;
     std::string robot_desc_string;
     n.param("robot_description", robot_desc_string, std::string());
@@ -130,29 +130,34 @@ int main(int argc, char** argv)
 
     while(ros::ok())
     {
+        // Record start time
+        auto start = std::chrono::high_resolution_clock::now();
         // ik computation
-        if(flag)
-        {
-            // Move the leg from nominal->end effector pose
-            fk_solver.JntToCart(q, end_effector_pose); // calculate end effector pose
-            // start in nominal, move to end effector pose, calculate the result for the actual ik solution
-            int rc = tracik_solver.CartToJnt(nominal, end_effector_pose, result);
-            print_frame_lambda(end_effector_pose);
-            ROS_INFO("flag");
-        }
-        else
-        {
-            // Move the leg from ee pose->nominal
-            fk_solver.JntToCart(nominal, end_effector_pose); 
-            int rc = tracik_solver.CartToJnt(q, end_effector_pose, result);
-            print_frame_lambda(end_effector_pose);
-            ROS_INFO("!flag");
-            if(prev_flag == true)
+        // for(int i=0;i<4;i++) // Rough test for 4 legs 
+        // {
+            if(flag)
             {
-                x_trans += 0.1;
+                // Move the leg from nominal->end effector pose
+                fk_solver.JntToCart(q, end_effector_pose); // calculate end effector pose
+                // start in nominal, move to end effector pose, calculate the result for the actual ik solution
+                int rc = tracik_solver.CartToJnt(nominal, end_effector_pose, result);
+                print_frame_lambda(end_effector_pose);
+                ROS_INFO("flag");
             }
-        }
-
+            else
+            {
+                // Move the leg from ee pose->nominal
+                fk_solver.JntToCart(nominal, end_effector_pose); 
+                int rc = tracik_solver.CartToJnt(q, end_effector_pose, result);
+                print_frame_lambda(end_effector_pose);
+                ROS_INFO("!flag");
+                if(prev_flag == true)
+                {
+                    x_trans += 0.1;
+                }
+            }
+        //     flag = !flag;
+        // }
         // update joint_state
         ROS_INFO("update joint state");
         joint_state.header.stamp = ros::Time::now();
@@ -182,6 +187,12 @@ int main(int argc, char** argv)
 
 
         prev_flag = flag;
+
+        // Record end time
+        auto finish = std::chrono::high_resolution_clock::now();
+        std::chrono::duration<double> elapsed = (finish-start);
+        std::cout << "Time Elapsed calculating one leg: " << elapsed.count() << " seconds.";
+        std::cout << std::endl;
         ros::spinOnce();
         loop_rate.sleep();
     }
